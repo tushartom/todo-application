@@ -9,6 +9,10 @@ export default function App() {
   );
   const [isEditing, setIsEditing] = useState(false);
   const [taskId, setTaskId] = useState("");
+  const [filterTasks, setFilterTasks] = useState({
+    showOnlyCompletedTask: false,
+    showOnlyIncompleteTask: false,
+  });
 
   useEffect(() => {
     localStorage.setItem("todos", JSON.stringify(todos));
@@ -61,6 +65,10 @@ export default function App() {
       </div>
       <div className="container">
         <AddTask addTask={addTask} task={task} onChange={handleChange} />
+        <FeaturesRow
+          filterTasks={filterTasks}
+          setFilterTasks={setFilterTasks}
+        />
         <Tasks
           todos={todos}
           deleteTask={deleteTask}
@@ -69,6 +77,7 @@ export default function App() {
           handleEditTask={handleEditTask}
           taskId={taskId}
           handleSaveDraft={handleSaveDraft}
+          filterTasks={filterTasks}
         />
       </div>
     </>
@@ -92,6 +101,56 @@ function AddTask({ addTask, task, onChange }) {
   );
 }
 
+function FeaturesRow({ filterTasks, setFilterTasks }) {
+  return (
+    <div className="filter-row">
+      <div className="checkbox-wrapper-46">
+        <input
+          className="inp-cbx"
+          id="show-completed-task"
+          type="checkbox"
+          checked={filterTasks.showOnlyCompletedTask}
+          onChange={() =>
+            setFilterTasks((prev) => ({
+              ...prev,
+              showOnlyCompletedTask: !prev.showOnlyCompletedTask,
+            }))
+          }
+        />
+        <label className="cbx" htmlFor="show-completed-task">
+          <span>
+            <svg width="12px" height="10px" viewBox="0 0 12 10">
+              <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+            </svg>
+          </span>
+          <span>Completed Tasks</span>
+        </label>
+      </div>
+      <div className="checkbox-wrapper-46">
+        <input
+          className="inp-cbx"
+          id="show-incompleted-task"
+          type="checkbox"
+          checked={filterTasks.showOnlyIncompleteTask}
+          onChange={() =>
+            setFilterTasks((prev) => ({
+              ...prev,
+              showOnlyIncompleteTask: !prev.showOnlyIncompleteTask,
+            }))
+          }
+        />
+        <label className="cbx" htmlFor="show-incompleted-task">
+          <span>
+            <svg width="12px" height="10px" viewBox="0 0 12 10">
+              <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+            </svg>
+          </span>
+          <span>Incompleted Tasks</span>
+        </label>
+      </div>
+    </div>
+  );
+}
 function Tasks({
   todos,
   deleteTask,
@@ -100,39 +159,42 @@ function Tasks({
   handleEditTask,
   taskId,
   handleSaveDraft,
+  filterTasks,
 }) {
   const completedTasks = todos.filter((todo) => todo.completed === true);
   const incompletedTasks = todos.filter((todo) => todo.completed === false);
   return (
     <ul className="tasks-list">
-      {incompletedTasks.map((todo) => (
-        <Task
-          task={todo.task}
-          key={todo.id}
-          id={todo.id}
-          completed={todo.completed}
-          deleteTask={deleteTask}
-          handleTaskStatus={handleTaskStatus}
-          isEditing={isEditing}
-          handleEditTask={handleEditTask}
-          taskId={taskId}
-          handleSaveDraft={handleSaveDraft}
-        />
-      ))}
-      {completedTasks.map((todo) => (
-        <Task
-          task={todo.task}
-          key={todo.id}
-          id={todo.id}
-          completed={todo.completed}
-          deleteTask={deleteTask}
-          handleTaskStatus={handleTaskStatus}
-          isEditing={isEditing}
-          handleEditTask={handleEditTask}
-          taskId={taskId}
-          handleSaveDraft={handleSaveDraft}
-        />
-      ))}
+      {filterTasks.showOnlyCompletedTask ||
+        incompletedTasks.map((todo) => (
+          <Task
+            task={todo.task}
+            key={todo.id}
+            id={todo.id}
+            completed={todo.completed}
+            deleteTask={deleteTask}
+            handleTaskStatus={handleTaskStatus}
+            isEditing={isEditing}
+            handleEditTask={handleEditTask}
+            taskId={taskId}
+            handleSaveDraft={handleSaveDraft}
+          />
+        ))}
+      {filterTasks.showOnlyIncompleteTask ||
+        completedTasks.map((todo) => (
+          <Task
+            task={todo.task}
+            key={todo.id}
+            id={todo.id}
+            completed={todo.completed}
+            deleteTask={deleteTask}
+            handleTaskStatus={handleTaskStatus}
+            isEditing={isEditing}
+            handleEditTask={handleEditTask}
+            taskId={taskId}
+            handleSaveDraft={handleSaveDraft}
+          />
+        ))}
     </ul>
   );
 }
